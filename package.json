@@ -1,0 +1,26 @@
+{
+  "name": "dd2482-ical",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "dd2482-ical"
+  },
+  "author": "Johan Edman",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node-fetch": "^2.6.1",
+    "@typescript-eslint/eslint-plugin": "^5.15.0",
+    "@typescript-eslint/parser": "^5.15.0",
+    "eslint": "^8.11.0",
+    "eslint-config-google": "^0.14.0",
+    "typescript": "^4.6.2"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.7"
+  }
+}
