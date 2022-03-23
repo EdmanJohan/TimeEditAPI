@@ -1,21 +1,23 @@
+import { DateTime } from 'luxon';
 import TimeEditAPI from '../src';
 
-
-async function fetchCourse(timeEdit: TimeEditAPI, courseName: string) {
-    const courseUrl = timeEdit.getCourseUrl(courseName);
-    return timeEdit.getCourse(courseUrl);
+async function fetchCourseEvents(timeEdit: TimeEditAPI, courseName: string) {
+    const courseCode = await timeEdit.getCourseId(courseName);
+    return timeEdit.getCourseEvents(courseCode)
 }
 
 
-
-
-const baseUrl = "https://www.kth.se/student/kurser/kurs/";
+const baseUrl = "https://cloud.timeedit.net/kth/web/public01/";
 const courseName = "DD2482";
-const timeEdit = new TimeEditAPI(baseUrl);
+const timeEdit = new TimeEditAPI(baseUrl, true);
 
 
-fetchCourse(timeEdit, courseName).then((courseObj) => {
-    console.log(courseObj)
+fetchCourseEvents(timeEdit, courseName).then((courseEvents) => {
+    courseEvents.forEach(event => {
+        const startTime = event.startDate.setLocale('se').toLocaleString(DateTime.DATETIME_SHORT);
+        const endTime = event.endDate.setLocale('se').toLocaleString(DateTime.DATETIME_SHORT);
+        console.log(`Start:\t\t${startTime}\nEnd:\t\t${endTime}\nLecturers:\t${event.lecturers}\nType:\t\t${event.type}\n`)
+    });
 });
 
 
