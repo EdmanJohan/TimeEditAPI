@@ -55,7 +55,8 @@ class TimeEditAPI {
                     startDate: DateTime.fromISO(`${event.startdate}T${event.starttime}`),
                     endDate: DateTime.fromISO(`${event.enddate}T${event.endtime}`),
                     lecturers: event.columns[3].split(", "),
-                    location: this.useKTHPlaces ? (this.getKTHLocationURL(event.columns[4].split(", "))) : event.columns[4].split(", "),
+                    location: event.columns[4].split(", "),
+                    locationUrl: this.useKTHPlaces ? (this.getKTHLocationURL(event.columns[4].split(", "))) : event.columns[4].split(", "),
                     type: event.columns[5],
                 };
             });
