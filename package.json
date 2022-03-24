@@ -1,5 +1,5 @@
 {
-  "name": "timeedit-api",
+  "name": "simple-timeedit-api",
   "version": "1.0.0",
   "description": "Fetches data from TimeEdit",
   "main": "dist/index.js",
