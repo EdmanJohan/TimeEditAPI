@@ -1,8 +1,9 @@
 {
-  "name": "dd2482-ical",
+  "name": "TimeEditAPI",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Fetches data from TimeEdit",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
