@@ -11,20 +11,22 @@ import { DateTime } from "luxon";
 class TimeEditAPI {
     readonly baseUrl: string;
     filterEmpty: boolean;
-    filterStartDate: Date;
-    filterEndDate: Date;
+    filterStartDate: string;
+    filterEndDate: string;
     filterToSemester: boolean;
+    useKTHPlaces: boolean;
 
     /**
      * Initalizes a TimeEdit instance for a certain URL.
      * @param baseUrl - Url for TimeEdit - E.g. "https://cloud.timeedit.net/kth/web/public01/"
      */
-    constructor(baseUrl: string, filterEmpty: boolean = false, filterToSemester: boolean = true, startDate: Date = null, endDate: Date = null) {
+    constructor({ baseUrl = null, filterEmpty = false, filterToSemester = true, startDate = null, endDate = null, useKTHPlaces = false }: { baseUrl: string, filterEmpty?: boolean, filterToSemester?: boolean, startDate?: string, endDate?: string, useKTHPlaces?: boolean }) {
         this.baseUrl = baseUrl;
         this.filterEmpty = filterEmpty;
         this.filterToSemester = filterToSemester;
         this.filterStartDate = startDate;
         this.filterEndDate = endDate;
+        this.useKTHPlaces = useKTHPlaces;
     }
 
     /**
@@ -45,15 +47,15 @@ class TimeEditAPI {
             console.error(`Error body: ${errorBody}`);
         }
 
-        const jsonData = await response.json();       
-        
+        const jsonData = await response.json();
+
         let courseEvents = jsonData.reservations
             .map((event: { startdate: string; starttime: string; enddate: string, endtime: string; columns: any[]; }) => {
                 return {
                     startDate: DateTime.fromISO(`${event.startdate}T${event.starttime}`),
                     endDate: DateTime.fromISO(`${event.enddate}T${event.endtime}`),
                     lecturers: event.columns[3].split(", "),
-                    room: this.getKTHLocationURL(event.columns[4].split(", ")),
+                    location: this.useKTHPlaces ? (this.getKTHLocationURL(event.columns[4].split(", "))) : event.columns[4].split(", "),
                     type: event.columns[5],
                 };
             });
@@ -64,6 +66,10 @@ class TimeEditAPI {
 
         if (this.filterEmpty) {
             courseEvents = courseEvents.filter(this.filterEmptyEvents);
+        }
+
+        if (this.filterStartDate) {
+            courseEvents = courseEvents.filter(this.eventBeforeDate)
         }
 
         return courseEvents;
@@ -113,12 +119,18 @@ class TimeEditAPI {
         return urls;
     }
 
-    filterEmptyEvents(event: { lecturers: string[]; room: string[]; type: string; }) {
+    /**
+     * Function: filterEmptyEvents
+     * Description: Filter events based on empty fields.
+     * @param event 
+     * @returns 
+     */
+    filterEmptyEvents(event: { lecturers: string[]; location: string[]; type: string; }) {
         if (event.lecturers.length == 0) {
             return false;
         }
 
-        if (event.room.length == 0) {
+        if (event.location.length == 0) {
             return false;
         }
 
@@ -129,11 +141,16 @@ class TimeEditAPI {
         return true;
     }
 
+    /**
+     * Function: eventInCurrentKTHPeriod
+     * Description: 
+     * @param event 
+     * @returns 
+     */
     eventInCurrentKTHPeriod(event: { startDate: DateTime }): true | false {
         // TODO: Fetch semester dates automatically from site.
         // const periodBaseUrl = "https://www.kth.se/student/studier/schema/lasarsindelning/"
         const dt = DateTime.now();
-
 
         let currentSemester: number[];
         if (1 < dt.month && dt.month < 7) {
@@ -145,6 +162,14 @@ class TimeEditAPI {
         }
 
         return currentSemester.includes(event.startDate.month) && dt.hasSame(event.startDate, 'year');
+    }
+
+    eventBeforeDate(event: { endDate: DateTime; }) {
+        return event.endDate < DateTime.fromSQL(this.filterStartDate);
+    }
+
+    eventAfterDate(event: { startDate: DateTime; }) {
+        return event.startDate < DateTime.fromSQL(this.filterEndDate)
     }
 
     /**
